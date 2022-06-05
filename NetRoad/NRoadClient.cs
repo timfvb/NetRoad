@@ -1,11 +1,12 @@
 ﻿/*
  * ===============================================
  * N-ROAD OPEN SOURCE NETWORK LIBRARY PROJECT
- * BY https://github.com/timfvb
+ * AUTHOR: https://github.com/timfvb
  * ===============================================
  */
 
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using NetRoad.Network;
 
@@ -13,7 +14,7 @@ namespace NetRoad;
 
 public class NRoadClient
 {
-    private Client _client;
+    private readonly Client _client;
 
     /// <summary>
     /// Initialize a new NRoad Client Object
@@ -37,11 +38,11 @@ public class NRoadClient
     {
         // Check validation of ipv4 address format
         if (!IPAddress.TryParse(address, out var ipAddress))
-            throw new FormatException("Address must be a valid IPv4 address format.");
+            throw new FormatException("Address must be a valid IPv4 address format");
         
         // Check validation of the port format
         if (port > Math.Pow(2, 16) - 1)
-            throw new ArgumentException("Port range format is wrong. Port Range: 0-65535.");
+            throw new ArgumentException("Port range format is wrong. Port Range: 0-65535");
         
         // Check encoding parameter 
         if (encoding == null)
@@ -54,8 +55,41 @@ public class NRoadClient
         _client = new Client(endpoint, encoding);
     }
     
+    /// <summary>
+    /// Connect NRoad Client to destination
+    /// </summary>
+    /// <returns>If the connections was successful -> true will be returned</returns>
     public bool Connect()
     {
-        return _client.Connect();
+        // Is client successful initialized
+        if (_client == null)
+            throw new NullReferenceException("Client is not initialized");
+        
+        // Check if the client is already connected
+        if (_client.Socket.Connected)
+            throw new Exception("Client is already connected");
+        
+        // Start connecting NRoad client 
+        return _client.Connect(); 
+    }
+    
+    /// <summary>
+    /// Send content to destination
+    /// </summary>
+    /// <param name="content">Content</param>
+    /// <param name="timeout">Send Timeout, default: 3000</param>
+    public void Send(string content, int timeout = 3000)
+    {
+        _client.Send(content, timeout);
+    }
+    
+    /// <summary>
+    /// Send content to destination
+    /// </summary>
+    /// <param name="content">Content</param>
+    /// <param name="timeout">Send Timeout, default: 3000</param>
+    public void Send(byte[] content, int timeout = 3000)
+    {
+        _client.Send(content, timeout);
     }
 }

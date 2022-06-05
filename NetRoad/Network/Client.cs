@@ -1,7 +1,7 @@
 ﻿/*
  * ===============================================
  * N-ROAD OPEN SOURCE NETWORK LIBRARY PROJECT
- * BY https://github.com/timfvb
+ * AUTHOR: https://github.com/timfvb
  * ===============================================
  */
 
@@ -13,13 +13,13 @@ namespace NetRoad.Network;
 
 public class Client
 {
-    private Socket _socket;
-    private EndPoint _endPoint;
-    private Encoding _encoding;
-    
+    public readonly Socket Socket;
+    private readonly EndPoint _endPoint;
+    private readonly Encoding _encoding;
+
     public Client(EndPoint endPoint, Encoding encoding)
     {
-        _socket = new Socket(GetCurrentAddressFamily(), SocketType.Stream, ProtocolType.Tcp);
+        Socket = new Socket(GetCurrentAddressFamily(), SocketType.Stream, ProtocolType.Tcp);
         _endPoint = endPoint;
         _encoding = encoding;
     }
@@ -28,7 +28,7 @@ public class Client
     {
         try
         {
-            _socket.Connect(_endPoint);
+            Socket.Connect(_endPoint);
             return true;
         }
         catch (Exception e)
@@ -40,20 +40,33 @@ public class Client
         }
     }
 
-    public void Send(string content, int timeout = 3000)
+    public void Send(string content, int timeout)
     {
         // Check if client is connected
-        if (!_socket.Connected)
+        if (!Socket.Connected)
             throw new Exception("NRoadClient is not connected");
 
         // Set send timeout
-        _socket.SendTimeout = timeout; 
+        Socket.SendTimeout = timeout; 
             
         // Encode string to byte array
         var bytes = _encoding.GetBytes(content);
         
         // Send bytes to the destination
-        _socket.Send(bytes);
+        Socket.Send(bytes);
+    }
+    
+    public void Send(byte[] content, int timeout)
+    {
+        // Check if client is connected
+        if (!Socket.Connected)
+            throw new Exception("NRoadClient is not connected");
+
+        // Set send timeout
+        Socket.SendTimeout = timeout;
+
+        // Send bytes to the destination
+        Socket.Send(content);
     }
 
     private static AddressFamily GetCurrentAddressFamily()
