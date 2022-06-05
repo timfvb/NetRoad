@@ -22,7 +22,7 @@ public class NRoadClient
     /// </summary>
     /// <param name="endPoint">Pair from IP and port</param>
     /// <param name="encoding">Encoding type</param>
-    public NRoadClient(EndPoint endPoint, Encoding encoding)
+    public NRoadClient(IPEndPoint endPoint, Encoding encoding)
     {
         _client = new Client(endPoint, encoding);
     }
@@ -67,7 +67,7 @@ public class NRoadClient
             throw new NullReferenceException("Client is not initialized");
         
         // Check if the client is already connected
-        if (_client.Socket.Connected)
+        if (_client.clientSocket.Connected)
             throw new Exception("Client is already connected");
         
         // Start connecting NRoad client 
@@ -94,6 +94,9 @@ public class NRoadClient
     /// <param name="timeout">Send Timeout, default: 3000</param>
     public void Send(byte[] content, int timeout = 3000)
     {
+        if (content.Length == 0)
+            throw new Exception("Content is empty");
+    
         _client.Send(content, timeout);
     }
 }

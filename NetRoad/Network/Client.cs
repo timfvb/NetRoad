@@ -13,13 +13,15 @@ namespace NetRoad.Network;
 
 public class Client
 {
-    public readonly Socket Socket;
-    private readonly EndPoint _endPoint;
+    public readonly TcpClient tClient;
+    public readonly Socket clientSocket;
+    private readonly IPEndPoint _endPoint;
     private readonly Encoding _encoding;
 
-    public Client(EndPoint endPoint, Encoding encoding)
+    public Client(IPEndPoint endPoint, Encoding encoding)
     {
-        Socket = new Socket(GetCurrentAddressFamily(), SocketType.Stream, ProtocolType.Tcp);
+        tClient = new TcpClient();
+        clientSocket = tClient.Client;
         _endPoint = endPoint;
         _encoding = encoding;
     }
@@ -28,14 +30,16 @@ public class Client
     {
         try
         {
-            Socket.Connect(_endPoint);
+            tClient.Connect(_endPoint);
             return true;
         }
         catch (Exception e)
         {
             // Destination not reachable
+            Console.WriteLine(e.Message);
             if (e is SocketException)
                 return false;
+            
             throw;
         }
     }
@@ -43,37 +47,35 @@ public class Client
     public void Send(string content, int timeout)
     {
         // Check if client is connected
-        if (!Socket.Connected)
+        if (!tClient.Connected)
             throw new Exception("NRoadClient is not connected");
 
         // Set send timeout
-        Socket.SendTimeout = timeout; 
+        tClient.SendTimeout = timeout; 
             
         // Encode string to byte array
         var bytes = _encoding.GetBytes(content);
         
+        var writer = new StreamWriter(tClient.GetStream(), _encoding);
+        
         // Send bytes to the destination
-        Socket.Send(bytes);
+        writer.WriteLine(bytes);
+        writer.Flush();
     }
     
     public void Send(byte[] content, int timeout)
     {
         // Check if client is connected
-        if (!Socket.Connected)
+        if (!tClient.Connected)
             throw new Exception("NRoadClient is not connected");
 
         // Set send timeout
-        Socket.SendTimeout = timeout;
+        tClient.SendTimeout = timeout;
 
-        // Send bytes to the destination
-        Socket.Send(content);
-    }
-
-    private static AddressFamily GetCurrentAddressFamily()
-    {
-        var hostInfo = Dns.GetHostEntry(Dns.GetHostName());  
-        var ipAddress = hostInfo.AddressList[0];
+        var writer = new StreamWriter(tClient.GetStream(), _encoding);
         
-        return ipAddress.AddressFamily;
+        // Send bytes to the destination
+        writer.WriteLine(content);
+        writer.Flush();
     }
 }

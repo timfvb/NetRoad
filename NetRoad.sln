@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetRoad", "NetRoad\NetRoad.csproj", "{4572C324-3CEF-40DB-A5E5-20FA10D97F44}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetRoad.Test", "NetRoad.Test\NetRoad.Test.csproj", "{75D2ADB1-B18E-49FC-A807-7A800C56A088}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{4572C324-3CEF-40DB-A5E5-20FA10D97F44}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4572C324-3CEF-40DB-A5E5-20FA10D97F44}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4572C324-3CEF-40DB-A5E5-20FA10D97F44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75D2ADB1-B18E-49FC-A807-7A800C56A088}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75D2ADB1-B18E-49FC-A807-7A800C56A088}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75D2ADB1-B18E-49FC-A807-7A800C56A088}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75D2ADB1-B18E-49FC-A807-7A800C56A088}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
