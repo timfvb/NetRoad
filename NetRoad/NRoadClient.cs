@@ -67,7 +67,7 @@ public class NRoadClient
             throw new NullReferenceException("Client is not initialized");
         
         // Check if the client is already connected
-        if (_client.clientSocket.Connected)
+        if (_client.NetClient.Connected)
             throw new Exception("Client is already connected");
         
         // Start connecting NRoad client 
