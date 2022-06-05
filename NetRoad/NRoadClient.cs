@@ -6,6 +6,7 @@
  */
 
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text;
 using NetRoad.Network;
@@ -80,6 +81,9 @@ public class NRoadClient
     /// <param name="timeout">Send Timeout, default: 3000</param>
     public void Send(string content, int timeout = 3000)
     {
+        if (content.Length == 0 | string.IsNullOrWhiteSpace(content))
+            throw new Exception("Content is empty");
+        
         _client.Send(content, timeout);
     }
     
