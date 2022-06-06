@@ -16,8 +16,7 @@ public class NRoadClient
     private readonly Client _client;
 
     public delegate void ConnectionEventHandler(object sender);
-    public delegate void ConnectionEventHandler<TEventArgs>(object sender, TEventArgs e);
-    
+
     /// <summary>
     /// Raised when a successful connection between NRoad client and server has been established
     /// </summary>
@@ -26,10 +25,6 @@ public class NRoadClient
     /// Raised when an existing connection between NRoad client and server has been disconnected
     /// </summary>
     public event ConnectionEventHandler? OnDisconnect;
-    /// <summary>
-    /// Triggered when a valid data packet is received from the NRoad client
-    /// </summary>
-    public event ConnectionEventHandler<string>? OnDataReceived;
 
     /// <summary>
     /// Initialize a new NRoad Client Object
