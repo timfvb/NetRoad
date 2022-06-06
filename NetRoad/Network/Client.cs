@@ -17,7 +17,13 @@ public class Client
     private readonly IPEndPoint _endPoint;
     private readonly Encoding _encoding;
 
-    public Client(IPEndPoint endPoint, Encoding encoding)
+    public delegate void ConnectionEventHandler(object sender);
+
+    
+    public event ConnectionEventHandler? OnConnect;
+    public event ConnectionEventHandler? OnDisconnect;
+
+    public Client(IPEndPoint endPoint, Encoding encoding, bool enableTcpListener)
     {
         NetClient = new TcpClient();
         _endPoint = endPoint;
@@ -28,25 +34,40 @@ public class Client
     {
         try
         {
+            // Try to connect to destination
             NetClient.Connect(_endPoint);
+            
+            // Invoke Connection Success Event
+            OnConnect?.Invoke(this);
             return true;
         }
         catch (Exception e)
         {
             // Destination not reachable
-            Console.WriteLine(e.Message);
             if (e is SocketException)
                 return false;
-            
             throw;
         }
+    }
+    
+    public void Disconnect()
+    {
+        // Check if client still connected
+        if (!NetClient.Connected)
+            throw new Exception("Client is not connected");
+        
+        // Close current network connection
+        NetClient.Close();
+        
+        // Invoke Disconnection Event
+        OnDisconnect?.Invoke(this);
     }
 
     public void Send(string content, int timeout)
     {
         // Check if client is connected
         if (!NetClient.Connected)
-            throw new Exception("NRoadClient is not connected");
+            OnDisconnect?.Invoke(this);
 
         // Set send timeout
         NetClient.SendTimeout = timeout; 
@@ -63,7 +84,7 @@ public class Client
     {
         // Check if client is connected
         if (!NetClient.Connected)
-            throw new Exception("NRoadClient is not connected");
+            OnDisconnect?.Invoke(this);
 
         // Set send timeout
         NetClient.SendTimeout = timeout;

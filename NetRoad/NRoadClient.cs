@@ -6,8 +6,6 @@
  */
 
 using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Sockets;
 using System.Text;
 using NetRoad.Network;
 
@@ -17,14 +15,35 @@ public class NRoadClient
 {
     private readonly Client _client;
 
+    public delegate void ConnectionEventHandler(object sender);
+    public delegate void ConnectionEventHandler<TEventArgs>(object sender, TEventArgs e);
+    
+    /// <summary>
+    /// Raised when a successful connection between NRoad client and server has been established
+    /// </summary>
+    public event ConnectionEventHandler? OnConnect;
+    /// <summary>
+    /// Raised when an existing connection between NRoad client and server has been disconnected
+    /// </summary>
+    public event ConnectionEventHandler? OnDisconnect;
+    /// <summary>
+    /// Triggered when a valid data packet is received from the NRoad client
+    /// </summary>
+    public event ConnectionEventHandler<string>? OnDataReceived;
+
     /// <summary>
     /// Initialize a new NRoad Client Object
     /// </summary>
     /// <param name="endPoint">Pair from IP and port</param>
     /// <param name="encoding">Encoding type</param>
-    public NRoadClient(IPEndPoint endPoint, Encoding encoding)
+    /// <param name="enableTcpListener">Use Thread TCP Listener</param>
+    public NRoadClient(IPEndPoint endPoint, Encoding encoding, bool enableTcpListener)
     {
-        _client = new Client(endPoint, encoding);
+        // Create new client object
+        _client = new Client(endPoint, encoding, enableTcpListener);
+        
+        // Set NRoad Event
+        NRoadEventProperties();
     }
 
     /// <summary>
@@ -35,7 +54,8 @@ public class NRoadClient
     /// <param name="encoding"></param>
     /// <exception cref="FormatException">Invalid IPv4 Format</exception>
     /// <exception cref="ArgumentException">Invalid Port Range</exception>
-    public NRoadClient(string address, int port, Encoding encoding)
+    /// <param name="enableTcpListener">Use Thread TCP Listener</param>
+    public NRoadClient(string address, int port, Encoding encoding, bool enableTcpListener = true)
     {
         // Check validation of ipv4 address format
         if (!IPAddress.TryParse(address, out var ipAddress))
@@ -53,9 +73,24 @@ public class NRoadClient
         var endpoint = new IPEndPoint(ipAddress, port);
         
         // Create new client object
-        _client = new Client(endpoint, encoding);
+        _client = new Client(endpoint, encoding, enableTcpListener);
+        
+        // Set NRoad Event
+        NRoadEventProperties();
+    }
+
+    private void NRoadEventProperties()
+    {
+        // Connection Events
+        _client.OnConnect += ClientOnConnect;
+        _client.OnDisconnect += ClientOnDisconnect;
     }
     
+    private void ClientOnConnect(object sender) => OnConnect?.Invoke(sender);
+
+    private void ClientOnDisconnect(object sender) => OnDisconnect?.Invoke(sender);
+
+
     /// <summary>
     /// Connect NRoad Client to destination
     /// </summary>
@@ -72,6 +107,19 @@ public class NRoadClient
         
         // Start connecting NRoad client 
         return _client.Connect(); 
+    }
+
+    /// <summary>
+    /// Disconnect the NRoad Client from destination 
+    /// </summary>
+    /// <exception cref="NullReferenceException"></exception>
+    public void Disconnect()
+    {
+        // Is client successful initialized
+        if (_client == null)
+            throw new NullReferenceException("Client is not initialized");
+        
+        _client.Disconnect();
     }
     
     /// <summary>
