@@ -7,6 +7,8 @@
 
 using System.Net;
 using System.Net.Sockets;
+using System.Security;
+using System.Security.AccessControl;
 using System.Text;
 
 namespace NetRoad.Network;
@@ -16,18 +18,20 @@ public class Client
     public readonly TcpClient NetClient;
     private readonly IPEndPoint _endPoint;
     private readonly Encoding _encoding;
-
+    private readonly bool _enableTcpListener;
     public delegate void ConnectionEventHandler(object sender);
-
+    public delegate void DataEventHandler(object sender, string data);
     
-    public event ConnectionEventHandler? OnConnect;
-    public event ConnectionEventHandler? OnDisconnect;
+    public event ConnectionEventHandler? Connected;
+    public event ConnectionEventHandler? Disconnected;
+    public event DataEventHandler? DataReceived;
 
     public Client(IPEndPoint endPoint, Encoding encoding, bool enableTcpListener)
     {
         NetClient = new TcpClient();
         _endPoint = endPoint;
         _encoding = encoding;
+        _enableTcpListener = enableTcpListener;
     }
 
     public bool Connect()
@@ -37,8 +41,12 @@ public class Client
             // Try to connect to destination
             NetClient.Connect(_endPoint);
             
+            // Start a new receiver
+            if (_enableTcpListener)
+                StartReceiver();
+            
             // Invoke Connection Success Event
-            OnConnect?.Invoke(this);
+            Connected?.Invoke(this);
             return true;
         }
         catch (Exception e)
@@ -58,16 +66,16 @@ public class Client
         
         // Close current network connection
         NetClient.Close();
-        
+
         // Invoke Disconnection Event
-        OnDisconnect?.Invoke(this);
+        Disconnected?.Invoke(this);
     }
 
     public void Send(string content, int timeout)
     {
         // Check if client is connected
         if (!NetClient.Connected)
-            OnDisconnect?.Invoke(this);
+            Disconnected?.Invoke(this);
 
         // Set send timeout
         NetClient.SendTimeout = timeout; 
@@ -84,7 +92,7 @@ public class Client
     {
         // Check if client is connected
         if (!NetClient.Connected)
-            OnDisconnect?.Invoke(this);
+            Disconnected?.Invoke(this);
 
         // Set send timeout
         NetClient.SendTimeout = timeout;
@@ -98,5 +106,50 @@ public class Client
         // Send bytes to the destination
         writer.WriteLine(decoded);
         writer.Flush();
+    }
+
+    private void StartReceiver()
+    {
+        // Create new receiver thread
+        var receiverThread = new Thread(Receiver);
+        
+        // Start receiver thread
+        receiverThread.Start();
+    }
+    
+    private void Receiver()
+    {
+        // Create Network Stream Reader
+        var reader = new StreamReader(NetClient.GetStream(), _encoding);
+
+        try
+        {
+            while (NetClient.Connected)
+            {
+                // Waiting for available data
+                while (NetClient.Connected && !reader.EndOfStream)
+                {
+                    // Read available data
+                    var data = reader.ReadLine();
+                    
+                    // Invoke if available data not null or empty
+                    if (!string.IsNullOrEmpty(data))
+                        DataReceived?.Invoke(this, data);
+                }
+                
+                // CPU safety
+                Thread.Sleep(1);
+            }
+        }
+        catch (Exception e)
+        {
+            // Throw with exception details
+            throw new Exception(e.Message);
+        }
+        finally
+        {
+            // Close the currently network reader
+            reader.Close();
+        }
     }
 }

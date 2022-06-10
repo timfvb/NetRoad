@@ -16,16 +16,21 @@ public class NRoadClient
     private readonly Client _client;
 
     public delegate void ConnectionEventHandler(object sender);
+    public delegate void ConnectionEventHandler<TEventArgs>(object sender, TEventArgs e);
 
     /// <summary>
     /// Raised when a successful connection between NRoad client and server has been established
     /// </summary>
-    public event ConnectionEventHandler? OnConnect;
+    public event ConnectionEventHandler? Connected;
     /// <summary>
     /// Raised when an existing connection between NRoad client and server has been disconnected
     /// </summary>
-    public event ConnectionEventHandler? OnDisconnect;
-
+    public event ConnectionEventHandler? Disconnected;
+    /// <summary>
+    /// Triggered when a valid data packet is received from the NRoad client
+    /// </summary>
+    public event ConnectionEventHandler<string>? DataReceived;
+    
     /// <summary>
     /// Initialize a new NRoad Client Object
     /// </summary>
@@ -77,14 +82,18 @@ public class NRoadClient
     private void NRoadEventProperties()
     {
         // Connection Events
-        _client.OnConnect += ClientOnConnect;
-        _client.OnDisconnect += ClientOnDisconnect;
+        _client.Connected += ClientConnected;
+        _client.Disconnected += ClientDisconnected;
+        
+        // Data events
+        _client.DataReceived += ClientDataReceived;
     }
     
-    private void ClientOnConnect(object sender) => OnConnect?.Invoke(sender);
+    private void ClientConnected(object sender) => Connected?.Invoke(sender);
 
-    private void ClientOnDisconnect(object sender) => OnDisconnect?.Invoke(sender);
-
+    private void ClientDisconnected(object sender) => Disconnected?.Invoke(sender);
+    
+    private void ClientDataReceived(object sender, string content) => DataReceived?.Invoke(this, content);
 
     /// <summary>
     /// Connect NRoad Client to destination
