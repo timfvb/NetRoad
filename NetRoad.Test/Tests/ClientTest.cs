@@ -32,6 +32,9 @@ public class ClientTest
     public void Run()
     {
         var connectable = _client.Connect();
+
+        Console.WriteLine("Connectable\t{0}", connectable);
+        
         if (connectable)
             _client.Send("Hello World!");
     }

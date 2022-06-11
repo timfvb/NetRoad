@@ -18,7 +18,9 @@ public class Client
     public readonly TcpClient NetClient;
     private readonly IPEndPoint _endPoint;
     private readonly Encoding _encoding;
+    
     private readonly bool _enableTcpListener;
+    
     public delegate void ConnectionEventHandler(object sender);
     public delegate void DataEventHandler(object sender, string data);
     

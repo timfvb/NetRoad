@@ -13,37 +13,16 @@ namespace NetRoad.Test.Tests;
 
 public class ServerTest
 {
-    private TcpListener _listener;
-    
-    public ServerTest()
-    {
-        _listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 9991);
-    }
-
     public void Run()
     {
-        _listener.Start();
-
-        Console.WriteLine("ServerListener started");
+        var server = new NRoadServer("127.0.0.1", 9991, Encoding.UTF8);
+        server.DataReceived += ServerOnDataReceived;
         
-        Receive();
+        server.Start();
     }
 
-    private void Receive()
+    private void ServerOnDataReceived(object sender, string e)
     {
-        while (true)
-        {
-            var client = _listener.AcceptTcpClient();
-            var writer = new StreamWriter(client.GetStream(), Encoding.UTF8);
-            var reader = new StreamReader(client.GetStream(), Encoding.UTF8);
-
-            while (!reader.EndOfStream && client.Connected)
-            {
-                var read = reader.ReadLine();
-                writer.WriteLine(read);
-                writer.Flush();
-                Console.WriteLine("read:\t" + read);    
-            }
-        }
+        Console.WriteLine("Server received data: " + e);
     }
 }
