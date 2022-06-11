@@ -22,11 +22,11 @@ public class Client
     private readonly bool _enableTcpListener;
     
     public delegate void ConnectionEventHandler(object sender);
-    public delegate void DataEventHandler(object sender, string data);
+    public delegate void ConnectionEventHandler<in TEventArgs>(object sender, TEventArgs e);
     
     public event ConnectionEventHandler? Connected;
     public event ConnectionEventHandler? Disconnected;
-    public event DataEventHandler? DataReceived;
+    public event ConnectionEventHandler<string>? DataReceived;
 
     public Client(IPEndPoint endPoint, Encoding encoding, bool enableTcpListener)
     {
