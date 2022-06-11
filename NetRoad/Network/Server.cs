@@ -18,9 +18,11 @@ public class Server
     
     private bool _isRunning;
     
-    public delegate void DataEventHandler(object sender, string data);
+    public delegate void ConnectionEventHandler<in TEventArgs>(object sender, TEventArgs e);
     
-    public event DataEventHandler? DataReceived;
+    public event ConnectionEventHandler<IPAddress>? Connected;
+    public event ConnectionEventHandler<IPAddress>? Disconnected;
+    public event ConnectionEventHandler<string>? DataReceived;
     
     public Server(IPAddress address, int port, Encoding encoding)
     {
@@ -40,33 +42,43 @@ public class Server
         // Start forward
         Forward();
         
+        // Set the server running status true
         _isRunning = true;
         
+        // Sleep main thread
         Thread.Sleep(-1);
     }
 
     private void Forward()
     {
-        while (true)
+        while (_netListener.Server.IsBound)
         {
             // Accept incoming client
             var client = _netListener.AcceptTcpClient();
+            
+            // Get ipv4 address
+            var clientEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
             
             // Create new thread
             var receiverThread = new Thread(Receiver);
             
             // Start receiver thread with client parameter
             receiverThread.Start(client);
+
+            // Invoke with address parameter
+            Connected?.Invoke(this, clientEndPoint!.Address);
         }
     }
     
     private void Receiver(object? clientObj)
     {
+        // Check if client object is invalid (null)
         if (clientObj == null)
             throw new ArgumentException("Client is null", nameof(clientObj));
         
         var client = (TcpClient) clientObj;
-        
+        var clientEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
+
         // Create Network Stream Reader
         var reader = new StreamReader(client.GetStream(), _encoding);
 
@@ -79,15 +91,19 @@ public class Server
                 {
                     // Read available data
                     var data = reader.ReadLine();
-                    
+
                     // Invoke if available data not null or empty
                     if (!string.IsNullOrEmpty(data))
                         DataReceived?.Invoke(this, data);
                 }
-                
+
                 // CPU safety
                 Thread.Sleep(1);
             }
+        }
+        catch (IOException)
+        {
+            // Can not read stream (disconnect indicator)
         }
         catch (Exception e)
         {
@@ -96,8 +112,11 @@ public class Server
         }
         finally
         {
-            // Close the currently network reader
+            // Close the current network reader
             reader.Close();
+            
+            // Invoke disconnect with address parameter
+            Disconnected?.Invoke(this, clientEndPoint!.Address);
         }
     }
 }
