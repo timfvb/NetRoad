@@ -12,7 +12,7 @@ using NetRoad.Network;
 
 namespace NetRoad;
 
-public class NRoadServer
+public class NRoadTcpServer
 {
     private readonly Server _server;
     
@@ -36,7 +36,7 @@ public class NRoadServer
     /// </summary>
     /// <param name="port">Port format (0-65535)</param>
     /// <param name="encoding"></param>
-    public NRoadServer(int port, Encoding encoding)
+    public NRoadTcpServer(int port, Encoding encoding)
     {
         // Check validation of the port format
         if (port > Math.Pow(2, 16) - 1)
@@ -58,7 +58,7 @@ public class NRoadServer
     /// <param name="address">Enter a valid IPv4 address</param>
     /// <param name="port">Port format (0-65535)</param>
     /// <param name="encoding"></param>
-    public NRoadServer(IPAddress address, int port, Encoding encoding)
+    public NRoadTcpServer(IPAddress address, int port, Encoding encoding)
     {
         // Check validation of the port format
         if (port > Math.Pow(2, 16) - 1)
@@ -76,7 +76,7 @@ public class NRoadServer
     /// <param name="address">Enter a valid IPv4 address</param>
     /// <param name="port">Port format (0-65535)</param>
     /// <param name="encoding"></param>
-    public NRoadServer(string address, int port, Encoding encoding)
+    public NRoadTcpServer(string address, int port, Encoding encoding)
     {
         // Check validation of the port format
         if (port > Math.Pow(2, 16) - 1)

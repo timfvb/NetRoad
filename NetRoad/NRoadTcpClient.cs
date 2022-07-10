@@ -8,15 +8,16 @@
 using System.Net;
 using System.Text;
 using NetRoad.Network;
+using NetRoad.Protocol.Client;
 
 namespace NetRoad;
 
-public class NRoadClient
+public class NRoadTcpClient
 {
-    private readonly Client _client;
+    private readonly NetTcpClient _client;
 
     public delegate void ConnectionEventHandler(object sender);
-    public delegate void ConnectionEventHandler<TEventArgs>(object sender, TEventArgs e);
+    public delegate void ConnectionEventHandler<in TEventArgs>(object sender, TEventArgs e);
 
     /// <summary>
     /// Raised when a successful connection between NRoad client and server has been established
@@ -37,10 +38,10 @@ public class NRoadClient
     /// <param name="endPoint">Pair from IP and port</param>
     /// <param name="encoding">Encoding type</param>
     /// <param name="enableTcpListener">Use Thread TCP Listener</param>
-    public NRoadClient(IPEndPoint endPoint, Encoding encoding, bool enableTcpListener)
+    public NRoadTcpClient(IPEndPoint endPoint, Encoding encoding, bool enableTcpListener = true)
     {
         // Create new client object
-        _client = new Client(endPoint, encoding, enableTcpListener);
+        _client = new NetTcpClient(endPoint, encoding, enableTcpListener);
         
         // Set NRoad Event
         NRoadEventProperties();
@@ -51,11 +52,11 @@ public class NRoadClient
     /// </summary>
     /// <param name="address">Address from destination</param>
     /// <param name="port">Port from destination</param>
-    /// <param name="encoding"></param>
+    /// <param name="encoding">Encoding Type</param>
     /// <exception cref="FormatException">Invalid IPv4 Format</exception>
     /// <exception cref="ArgumentException">Invalid Port Range</exception>
     /// <param name="enableTcpListener">Use Thread TCP Listener</param>
-    public NRoadClient(string address, int port, Encoding encoding, bool enableTcpListener = true)
+    public NRoadTcpClient(string address, int port, Encoding encoding, bool enableTcpListener = true)
     {
         // Check validation of ipv4 address format
         if (!IPAddress.TryParse(address, out var ipAddress))
@@ -73,7 +74,7 @@ public class NRoadClient
         var endpoint = new IPEndPoint(ipAddress, port);
         
         // Create new client object
-        _client = new Client(endpoint, encoding, enableTcpListener);
+        _client = new NetTcpClient(endpoint, encoding, enableTcpListener);
         
         // Set NRoad Event
         NRoadEventProperties();
@@ -150,5 +151,18 @@ public class NRoadClient
             throw new Exception("Content is empty");
     
         _client.Send(content, timeout);
+    }
+
+    /// <summary>
+    /// Serialize Object and send as json 
+    /// </summary>
+    /// <param name="obj">Object for serialization</param>
+    /// <param name="timeout">Send Timeout, default: 3000</param>
+    public void SendObjectAsJson<T>(T obj, int timeout = 3000)
+    {
+        if (obj == null)
+            throw new ArgumentNullException(nameof(obj));
+        
+        _client.SendObjectAsJson(obj, timeout);
     }
 }

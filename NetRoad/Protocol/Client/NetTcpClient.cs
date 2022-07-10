@@ -7,13 +7,12 @@
 
 using System.Net;
 using System.Net.Sockets;
-using System.Security;
-using System.Security.AccessControl;
 using System.Text;
+using Newtonsoft.Json;
 
-namespace NetRoad.Network;
+namespace NetRoad.Protocol.Client;
 
-public class Client
+public class NetTcpClient
 {
     public readonly TcpClient NetClient;
     private readonly IPEndPoint _endPoint;
@@ -28,7 +27,7 @@ public class Client
     public event ConnectionEventHandler? Disconnected;
     public event ConnectionEventHandler<string>? DataReceived;
 
-    public Client(IPEndPoint endPoint, Encoding encoding, bool enableTcpListener)
+    public NetTcpClient(IPEndPoint endPoint, Encoding encoding, bool enableTcpListener)
     {
         NetClient = new TcpClient();
         _endPoint = endPoint;
@@ -107,6 +106,26 @@ public class Client
         
         // Send bytes to the destination
         writer.WriteLine(decoded);
+        writer.Flush();
+    }
+    
+    public void SendObjectAsJson<T>(T obj, int timeout)
+    {
+        // Check if client is connected
+        if (!NetClient.Connected)
+            Disconnected?.Invoke(this);
+
+        // Set send timeout
+        NetClient.SendTimeout = timeout;
+        
+        // Serialize object
+        var json = JsonConvert.SerializeObject(obj);
+
+        // Create a network writer
+        var writer = new StreamWriter(NetClient.GetStream(), _encoding);
+        
+        // Send bytes to the destination
+        writer.WriteLine(json);
         writer.Flush();
     }
 
