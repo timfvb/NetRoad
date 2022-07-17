@@ -6,6 +6,7 @@
  */
 
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using NetRoad.Network;
 using NetRoad.Protocol.Client;
@@ -164,5 +165,17 @@ public class NRoadTcpClient
             throw new ArgumentNullException(nameof(obj));
         
         _client.SendObjectAsJson(obj, timeout);
+    }
+    
+    /// <summary>
+    /// Get current TcpClient
+    /// </summary>
+    /// <exception cref="NullReferenceException"></exception>
+    public TcpClient GetTcpClient()
+    {
+        if (_client == null)
+            throw new NullReferenceException("Client is not initialized");
+        
+        return _client.NetClient;
     }
 }
