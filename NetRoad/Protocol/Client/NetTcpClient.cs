@@ -101,12 +101,20 @@ public class NetTcpClient
         // Decode byte array to string
         var decoded = _encoding.GetString(content);
 
-        // Create a network writer
-        var writer = new StreamWriter(NetClient.GetStream(), _encoding);
-        
-        // Send bytes to the destination
-        writer.WriteLine(decoded);
-        writer.Flush();
+        try
+        {
+            // Create a network writer
+            var writer = new StreamWriter(NetClient.GetStream(), _encoding);
+
+            // Send bytes to the destination
+            writer.WriteLine(decoded);
+            writer.Flush();
+        }
+        catch
+        {
+            // Invoke Disconnection Event
+            Disconnected?.Invoke(this);
+        }
     }
     
     public void SendObjectAsJson<T>(T obj, int timeout)
@@ -115,18 +123,26 @@ public class NetTcpClient
         if (!NetClient.Connected)
             Disconnected?.Invoke(this);
 
-        // Set send timeout
+        // Set timeout
         NetClient.SendTimeout = timeout;
         
         // Serialize object
         var json = JsonConvert.SerializeObject(obj);
 
-        // Create a network writer
-        var writer = new StreamWriter(NetClient.GetStream(), _encoding);
-        
-        // Send bytes to the destination
-        writer.WriteLine(json);
-        writer.Flush();
+        try
+        {
+            // Create a network writer
+            var writer = new StreamWriter(NetClient.GetStream(), _encoding);
+
+            // Send bytes to the destination
+            writer.WriteLine(json);
+            writer.Flush();
+        }
+        catch
+        {
+            // Invoke Disconnection Event
+            Disconnected?.Invoke(this);
+        }
     }
 
     private void StartReceiver()
