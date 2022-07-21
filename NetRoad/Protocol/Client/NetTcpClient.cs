@@ -72,7 +72,7 @@ public class NetTcpClient
         Disconnected?.Invoke(this);
     }
 
-    public void Send(string content, int timeout)
+    public bool Send(string content, int timeout)
     {
         // Check if client is connected
         if (!NetClient.Connected)
@@ -81,15 +81,29 @@ public class NetTcpClient
         // Set send timeout
         NetClient.SendTimeout = timeout; 
         
-        // Create a network writer
-        var writer = new StreamWriter(NetClient.GetStream(), _encoding);
-        
-        // Send bytes to the destination
-        writer.WriteLine(content);
-        writer.Flush();
+        try
+        {
+            // Create a network writer
+            var writer = new StreamWriter(NetClient.GetStream(), _encoding);
+
+            // Send bytes to the destination
+            writer.WriteLine(content);
+            writer.Flush();
+
+            // Return current connection status
+            return true;
+        }
+        catch
+        {
+            // Invoke Disconnection Event
+            Disconnected?.Invoke(this);
+            
+            // Return current connection status
+            return false;
+        }
     }
     
-    public void Send(byte[] content, int timeout)
+    public bool Send(byte[] content, int timeout)
     {
         // Check if client is connected
         if (!NetClient.Connected)
@@ -109,15 +123,21 @@ public class NetTcpClient
             // Send bytes to the destination
             writer.WriteLine(decoded);
             writer.Flush();
+
+            // Return current connection status
+            return true;
         }
         catch
         {
             // Invoke Disconnection Event
             Disconnected?.Invoke(this);
+            
+            // Return current connection status
+            return false;
         }
     }
     
-    public void SendObjectAsJson<T>(T obj, int timeout)
+    public bool SendObjectAsJson<T>(T obj, int timeout)
     {
         // Check if client is connected
         if (!NetClient.Connected)
@@ -137,11 +157,17 @@ public class NetTcpClient
             // Send bytes to the destination
             writer.WriteLine(json);
             writer.Flush();
+            
+            // Return current connection status
+            return true;
         }
         catch
         {
             // Invoke Disconnection Event
             Disconnected?.Invoke(this);
+
+            // Return current connection status
+            return false;
         }
     }
 

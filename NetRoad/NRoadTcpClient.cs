@@ -133,12 +133,13 @@ public class NRoadTcpClient
     /// </summary>
     /// <param name="content">Content</param>
     /// <param name="timeout">Send Timeout, default: 3000</param>
-    public void Send(string content, int timeout = 3000)
+    /// <returns>Connection Status</returns>
+    public bool Send(string content, int timeout = 3000)
     {
         if (content.Length == 0 | string.IsNullOrWhiteSpace(content))
             throw new Exception("Content is empty");
         
-        _client.Send(content, timeout);
+        return _client.Send(content, timeout);
     }
     
     /// <summary>
@@ -146,12 +147,13 @@ public class NRoadTcpClient
     /// </summary>
     /// <param name="content">Content</param>
     /// <param name="timeout">Send Timeout, default: 3000</param>
-    public void Send(byte[] content, int timeout = 3000)
+    /// <returns>Connection Status</returns>
+    public bool Send(byte[] content, int timeout = 3000)
     {
         if (content.Length == 0)
             throw new Exception("Content is empty");
     
-        _client.Send(content, timeout);
+        return _client.Send(content, timeout);
     }
 
     /// <summary>
@@ -159,12 +161,13 @@ public class NRoadTcpClient
     /// </summary>
     /// <param name="obj">Object for serialization</param>
     /// <param name="timeout">Send Timeout, default: 3000</param>
-    public void SendObjectAsJson<T>(T obj, int timeout = 3000)
+    /// <returns>Connection Status</returns>
+    public bool SendObjectAsJson<T>(T obj, int timeout = 3000)
     {
         if (obj == null)
             throw new ArgumentNullException(nameof(obj));
         
-        _client.SendObjectAsJson(obj, timeout);
+        return _client.SendObjectAsJson(obj, timeout);
     }
     
     /// <summary>
