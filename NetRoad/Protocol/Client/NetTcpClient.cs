@@ -204,10 +204,9 @@ public class NetTcpClient
                 Thread.Sleep(1);
             }
         }
-        catch (Exception e)
+        catch
         {
-            // Throw with exception details
-            throw new Exception(e.Message);
+            // ignored
         }
         finally
         {
