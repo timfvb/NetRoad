@@ -77,12 +77,12 @@ public class NetTcpClient
         // Check if client is connected
         if (!NetClient.Connected)
             Disconnected?.Invoke(this);
-
-        // Set send timeout
-        NetClient.SendTimeout = timeout; 
         
         try
         {
+            // Set send timeout
+            NetClient.SendTimeout = timeout; 
+            
             // Create a network writer
             var writer = new StreamWriter(NetClient.GetStream(), _encoding);
 
@@ -108,15 +108,15 @@ public class NetTcpClient
         // Check if client is connected
         if (!NetClient.Connected)
             Disconnected?.Invoke(this);
-
-        // Set send timeout
-        NetClient.SendTimeout = timeout;
         
         // Decode byte array to string
         var decoded = _encoding.GetString(content);
 
         try
         {
+            // Set send timeout
+            NetClient.SendTimeout = timeout;
+            
             // Create a network writer
             var writer = new StreamWriter(NetClient.GetStream(), _encoding);
 
@@ -142,15 +142,15 @@ public class NetTcpClient
         // Check if client is connected
         if (!NetClient.Connected)
             Disconnected?.Invoke(this);
-
-        // Set timeout
-        NetClient.SendTimeout = timeout;
         
         // Serialize object
         var json = JsonConvert.SerializeObject(obj);
 
         try
         {
+            // Set send timeout
+            NetClient.SendTimeout = timeout;
+            
             // Create a network writer
             var writer = new StreamWriter(NetClient.GetStream(), _encoding);
 
