@@ -10,8 +10,6 @@ public class NetUdpServer
     private IPEndPoint _endPoint;
     private readonly Encoding _encoding;
 
-    private bool _isRunning;
-    
     public delegate void ConnectionEventHandler<in TEventArgs>(object sender, TEventArgs e);
     public event ConnectionEventHandler<string>? DataReceived;
     
