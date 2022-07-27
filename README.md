@@ -88,6 +88,7 @@ NuGet Gallery: https://www.nuget.org/packages/NetRoad
  | [Newtonsoft.Json@^13.0.1](https://www.nuget.org/packages/Newtonsoft.Json) | Json.NET is a popular high-performance JSON framework for .NET| 13.0.1 | MIT
 
 ## License
+MIT License: https://choosealicense.com/licenses/mit
 
 ## Contact
 Discord: TimFvb#9999
