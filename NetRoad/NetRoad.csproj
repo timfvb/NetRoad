@@ -4,10 +4,28 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Title>NetRoad Library</Title>
+		<Authors>timfvb</Authors>
+        <Description>A lightweight network library</Description>
+        <PackageProjectUrl>https://github.com/timfvb/NetRoad</PackageProjectUrl>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageIcon>logo.png</PackageIcon>
+        <RepositoryUrl>https://github.com/timfvb/NetRoad</RepositoryUrl>
+        <PackageTags>network,netroad,nroad,net,sockets,tcp,udp,server,client,connect,receive</PackageTags>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	  <None Include="LICENSE" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="logo.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
     </ItemGroup>
 
 </Project>
