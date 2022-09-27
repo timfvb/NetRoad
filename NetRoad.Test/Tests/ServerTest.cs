@@ -5,24 +5,26 @@
  * ===============================================
  */
 
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 
 namespace NetRoad.Test.Tests;
 
 public class ServerTest
 {
+    private NRoadTcpServer _server;
+    
     public void Run()
     {
-        var server = new NRoadServer("127.0.0.1", 9991, Encoding.UTF8);
-        server.DataReceived += ServerOnDataReceived;
+        _server = new NRoadTcpServer("127.0.0.1", 9991, Encoding.UTF8);
+        _server.DataReceived += ServerOnDataReceived;
         
-        server.Start();
+        _server.Start();
     }
 
     private void ServerOnDataReceived(object sender, string e)
     {
         Console.WriteLine("Server received data: " + e);
+        
+        _server.SendToConnectedClients("hello this is a global message");
     }
 }

@@ -5,12 +5,11 @@
  * ===============================================
  */
 
-using System.Text;
 using NetRoad.Test.Tests;
 
 namespace NetRoad.Test
 {
-    class Program
+    internal static class Program
     {
         public static void Main(string[] args)
         {

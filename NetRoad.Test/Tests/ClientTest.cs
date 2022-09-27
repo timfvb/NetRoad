@@ -12,11 +12,11 @@ namespace NetRoad.Test.Tests;
 
 public class ClientTest
 {
-    private readonly NRoadClient _client;
+    private readonly NRoadTcpClient _client;
     
     public ClientTest()
     {
-        _client = new NRoadClient("127.0.0.1", 9991, Encoding.UTF8);
+        _client = new NRoadTcpClient("127.0.0.1", 9991, Encoding.UTF8);
         
         _client.Connected += ClientOnConnected;
         _client.Disconnected += ClientOnDisconnected;
