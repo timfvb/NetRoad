@@ -9,7 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace NetRoad.Network;
+namespace NetRoad.Protocol.Server;
 
 public class Server
 {
@@ -17,6 +17,8 @@ public class Server
     private readonly Encoding _encoding;
     
     private bool _isRunning;
+
+    public readonly List<TcpClient> ConnectedClients = new ();
     
     public delegate void ConnectionEventHandler<in TEventArgs>(object sender, TEventArgs e);
     
@@ -48,7 +50,47 @@ public class Server
         // Sleep main thread
         Thread.Sleep(-1);
     }
-
+    
+    public void SendToClient(TcpClient client, string content)
+    {
+        // Create stream writer
+        var networkWriter = new StreamWriter(client.GetStream(), _encoding);
+        
+        // Write on stream
+        networkWriter.WriteLine(content);
+        
+        // Flush
+        networkWriter.Flush();
+    }
+    
+    public void SendToClients(IEnumerable<TcpClient> clients, string content)
+    {
+        foreach (var client in clients)
+        {
+            // Create stream writer
+            var networkWriter = new StreamWriter(client.GetStream(), _encoding);
+        
+            // Write on stream
+            networkWriter.WriteLine(content);
+        
+            // Flush
+            networkWriter.Flush();
+        }
+    }
+    
+    public void SendToConnectedClients(string content)
+    {
+        foreach (var networkWriter in ConnectedClients.Select(client 
+                     => new StreamWriter(client.GetStream(), _encoding)))
+        {
+            // Write on stream
+            networkWriter.WriteLine(content);
+        
+            // Flush
+            networkWriter.Flush();
+        }
+    }
+    
     private void Forward()
     {
         while (_netListener.Server.IsBound)
@@ -58,6 +100,9 @@ public class Server
             
             // Get ipv4 address
             var clientEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
+            
+            // Add client to connected clients
+            ConnectedClients.Add(client);
             
             // Create new thread
             var receiverThread = new Thread(Receiver);
@@ -77,7 +122,7 @@ public class Server
             throw new ArgumentException("Client is null", nameof(clientObj));
         
         var client = (TcpClient) clientObj;
-        var clientEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
+        var clientEndPoint = (client.Client.RemoteEndPoint as IPEndPoint)!;
 
         // Create Network Stream Reader
         var reader = new StreamReader(client.GetStream(), _encoding);
@@ -101,9 +146,9 @@ public class Server
                 Thread.Sleep(1);
             }
         }
-        catch (IOException)
+        catch (InvalidOperationException)
         {
-            // Can not read stream (disconnect indicator)
+            // ignore
         }
         catch (Exception e)
         {
@@ -115,8 +160,11 @@ public class Server
             // Close the current network reader
             reader.Close();
             
+            // Remove client from the connected client list
+            ConnectedClients.Remove(client);
+
             // Invoke disconnect with address parameter
-            Disconnected?.Invoke(this, clientEndPoint!.Address);
+            Disconnected?.Invoke(this, clientEndPoint.Address);
         }
     }
 }

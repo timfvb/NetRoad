@@ -6,9 +6,10 @@
  */
 
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices.ObjectiveC;
 using System.Text;
-using NetRoad.Network;
+using NetRoad.Protocol.Server;
 
 namespace NetRoad;
 
@@ -96,7 +97,7 @@ public class NRoadTcpServer
     }
     
     private void ServerOnConnected(object sender, IPAddress e) => Connected?.Invoke(sender, e);
-
+    
     private void ServerOnDisconnected(object sender, IPAddress e) => Disconnected?.Invoke(sender, e);
     
     private void ServerOnDataReceived(object sender, string data) => DataReceived?.Invoke(sender, data);
@@ -109,5 +110,55 @@ public class NRoadTcpServer
     {
         // Start server instance
         _server.Start(backlog);
+    }
+
+    /// <summary>
+    /// Get all connected clients
+    /// </summary>
+    /// <returns>Client Arraylist</returns>
+    public TcpClient[] GetConnectedClients()
+    {
+        return _server.ConnectedClients.ToArray();
+    }
+    
+    /// <summary>
+    /// Send data to client
+    /// </summary>
+    /// <param name="client">Destination client</param>
+    /// <param name="content">Content to be transferred</param>
+    /// <exception cref="Exception">Content is null or empty</exception>
+    public void SendToClient(TcpClient client, string content)
+    {
+        if (content.Length == 0 | string.IsNullOrWhiteSpace(content))
+            throw new Exception("Content is empty");
+        
+        _server.SendToClient(client, content);
+    }
+
+    /// <summary>
+    /// Send data to multiple clients
+    /// </summary>
+    /// <param name="clients">Destination clients</param>
+    /// <param name="content">Content to be transferred</param>
+    /// <exception cref="Exception">Content is null or empty</exception>
+    public void SendToClients(IEnumerable<TcpClient> clients, string content)
+    {
+        if (content.Length == 0 | string.IsNullOrWhiteSpace(content))
+            throw new Exception("Content is empty");
+        
+        _server.SendToClients(clients, content);
+    }
+    
+    /// <summary>
+    /// Send data to all connected clients
+    /// </summary>
+    /// <param name="content">Content to be transferred</param>
+    /// <exception cref="Exception">Content is null or empty</exception>
+    public void SendToConnectedClients(string content)
+    {
+        if (content.Length == 0 | string.IsNullOrWhiteSpace(content))
+            throw new Exception("Content is empty");
+        
+        _server.SendToConnectedClients(content);
     }
 }
