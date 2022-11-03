@@ -64,19 +64,10 @@ server.Start();
 ```
 
 ## Installation
-Package Manager
-```
-Install-Package NetRoad -Version 1.0.0
-```
 
 .NET CLI
 ```
-dotnet add package NetRoad --version 1.0.0
-```
-
-Package Reference
-```
-<PackageReference Include="NetRoad" Version="1.0.0" />
+dotnet add package NetRoad
 ```
 
 <br />
