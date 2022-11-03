@@ -8,6 +8,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using NetRoad.Protocol.Client;
 
 namespace NetRoad;
@@ -126,32 +127,41 @@ public class NRoadTcpClient
         
         _client.Disconnect();
     }
-    
+
     /// <summary>
     /// Send content to destination
     /// </summary>
     /// <param name="content">Content</param>
+    /// <param name="removeControlCharacters">Remove Ascii Control Characters, default: true</param>
     /// <param name="timeout">Send Timeout, default: 3000</param>
     /// <returns>Connection Status</returns>
-    public bool Send(string content, int timeout = 3000)
+    public bool Send(string content, bool removeControlCharacters = true, int timeout = 3000)
     {
         if (content.Length == 0 | string.IsNullOrWhiteSpace(content))
             throw new Exception("Content is empty");
         
+        if (removeControlCharacters)
+            content = Regex.Replace(content, @"[^\u0020-\u007F]", string.Empty);
+        
         return _client.Send(content, timeout);
     }
-    
+
     /// <summary>
     /// Send content to destination
     /// </summary>
     /// <param name="content">Content</param>
+    /// <param name="removeControlCharacters">Remove Ascii Control Characters, default: true</param>
     /// <param name="timeout">Send Timeout, default: 3000</param>
     /// <returns>Connection Status</returns>
-    public bool Send(byte[] content, int timeout = 3000)
+    public bool Send(byte[] content, bool removeControlCharacters = true, int timeout = 3000)
     {
         if (content.Length == 0)
             throw new Exception("Content is empty");
-    
+        
+        if (removeControlCharacters)
+            content = _client.Encoding.GetBytes(Regex.Replace(_client.Encoding.GetString(content),
+                @"[^\u0020-\u007F]", string.Empty));
+        
         return _client.Send(content, timeout);
     }
 
