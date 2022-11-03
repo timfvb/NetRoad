@@ -35,13 +35,14 @@ public class NRoadTcpServer
     /// Triggered when a valid data packet is received from the NRoad server
     /// </summary>
     public event ConnectionEventHandler<string>? DataReceived;
-    
+
     /// <summary>
     /// Initialize new NRoadServer Object
     /// </summary>
     /// <param name="port">Port format (0-65535)</param>
     /// <param name="encoding"></param>
-    public NRoadTcpServer(int port, Encoding encoding)
+    /// <param name="removeControlCharacters">Remove Ascii Control Characters, default: true</param>
+    public NRoadTcpServer(int port, Encoding encoding, bool removeControlCharacters)
     {
         // Check validation of the port format
         if (port > Math.Pow(2, 16) - 1)
@@ -51,7 +52,7 @@ public class NRoadTcpServer
         if (encoding == null)
             throw new ArgumentNullException(nameof(encoding));
         
-        _server = new Server(IPAddress.Any, port, encoding);
+        _server = new Server(IPAddress.Any, port, encoding, removeControlCharacters);
         
         // Set NRoad Events
         NRoadEventProperties();
@@ -63,13 +64,14 @@ public class NRoadTcpServer
     /// <param name="address">Enter a valid IPv4 address</param>
     /// <param name="port">Port format (0-65535)</param>
     /// <param name="encoding"></param>
-    public NRoadTcpServer(IPAddress address, int port, Encoding encoding)
+    /// <param name="removeControlCharacters">Remove Ascii Control Characters, default: true</param>
+    public NRoadTcpServer(IPAddress address, int port, Encoding encoding, bool removeControlCharacters)
     {
         // Check validation of the port format
         if (port > Math.Pow(2, 16) - 1)
             throw new ArgumentException("Port range format is wrong. Port Range: 0-65535");
 
-        _server = new Server(address, port, encoding);
+        _server = new Server(address, port, encoding, removeControlCharacters);
         
         // Set NRoad Events
         NRoadEventProperties();
@@ -81,13 +83,14 @@ public class NRoadTcpServer
     /// <param name="address">Enter a valid IPv4 address</param>
     /// <param name="port">Port format (0-65535)</param>
     /// <param name="encoding"></param>
-    public NRoadTcpServer(string address, int port, Encoding encoding)
+    /// <param name="removeControlCharacters">Remove Ascii Control Characters, default: true</param>
+    public NRoadTcpServer(string address, int port, Encoding encoding, bool removeControlCharacters)
     {
         // Check validation of the port format
         if (port > Math.Pow(2, 16) - 1)
             throw new ArgumentException("Port range format is wrong. Port Range: 0-65535");
 
-        _server = new Server(IPAddress.Parse(address), port, encoding);
+        _server = new Server(IPAddress.Parse(address), port, encoding, removeControlCharacters);
         
         // Set NRoad Events
         NRoadEventProperties();

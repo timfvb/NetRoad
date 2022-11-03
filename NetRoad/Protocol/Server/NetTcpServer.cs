@@ -8,6 +8,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace NetRoad.Protocol.Server;
 
@@ -15,6 +16,7 @@ public class Server
 {
     private readonly TcpListener _netListener;
     private readonly Encoding _encoding;
+    private readonly bool _removeControlCharacters;
     
     private bool _isRunning;
 
@@ -27,10 +29,11 @@ public class Server
     public event ConnectionEventHandler<IPAddress>? Disconnected;
     public event ConnectionEventHandler<string>? DataReceived;
     
-    public Server(IPAddress address, int port, Encoding encoding)
+    public Server(IPAddress address, int port, Encoding encoding, bool removeControlCharacters)
     {
         _netListener = new TcpListener(address, port);
         _encoding = encoding;
+        _removeControlCharacters = removeControlCharacters;
     }
 
     public void Start(int backlog)
@@ -140,8 +143,13 @@ public class Server
                     var data = reader.ReadLine();
 
                     // Invoke if available data not null or empty
-                    if (!string.IsNullOrEmpty(data))
-                        DataReceived?.Invoke(this, data);
+                    if (string.IsNullOrEmpty(data))
+                        continue;
+                    
+                    if (_removeControlCharacters)
+                        data = Regex.Replace(data, @"[^\u0020-\u007F]", string.Empty);
+                    
+                    DataReceived?.Invoke(this, data);
                 }
 
                 // CPU safety
