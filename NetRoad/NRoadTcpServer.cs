@@ -18,7 +18,11 @@ public class NRoadTcpServer
     private readonly Server _server;
     
     public delegate void ConnectionEventHandler<in TEventArgs>(object sender, TEventArgs e);
-    
+ 
+    /// <summary>
+    /// Raised when the tcp-listener successful started
+    /// </summary>
+    public event ConnectionEventHandler<EndPoint>? Started;
     /// <summary>
     /// Raised when a new successful connection between NRoad client and server has been established
     /// </summary>
@@ -91,10 +95,13 @@ public class NRoadTcpServer
 
     private void NRoadEventProperties()
     {
+        _server.Started += ServerOnStarted;
         _server.Connected += ServerOnConnected;
         _server.Disconnected += ServerOnDisconnected;
         _server.DataReceived += ServerOnDataReceived;
     }
+    
+    private void ServerOnStarted(object sender, EndPoint e) => Started?.Invoke(sender, e);
     
     private void ServerOnConnected(object sender, IPAddress e) => Connected?.Invoke(sender, e);
     

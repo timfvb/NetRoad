@@ -22,6 +22,7 @@ public class Server
     
     public delegate void ConnectionEventHandler<in TEventArgs>(object sender, TEventArgs e);
     
+    public event ConnectionEventHandler<EndPoint>? Started;
     public event ConnectionEventHandler<IPAddress>? Connected;
     public event ConnectionEventHandler<IPAddress>? Disconnected;
     public event ConnectionEventHandler<string>? DataReceived;
@@ -41,14 +42,15 @@ public class Server
         // Start new listener
         _netListener.Start(backlog);
         
-        // Start forward
-        Forward();
+        // Start forward thread
+        var forwardThread = new Thread(Forward);
+        forwardThread.Start();
         
         // Set the server running status true
         _isRunning = true;
         
-        // Sleep main thread
-        Thread.Sleep(-1);
+        // Invoke with endpoint parameter
+        Started?.Invoke(this, _netListener.LocalEndpoint);
     }
     
     public void SendToClient(TcpClient client, string content)
