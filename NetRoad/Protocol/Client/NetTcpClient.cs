@@ -16,7 +16,7 @@ public class NetTcpClient
 {
     public readonly TcpClient NetClient;
     private readonly IPEndPoint _endPoint;
-    public readonly Encoding Encoding;
+    private readonly Encoding _encoding;
     
     private readonly bool _enableTcpListener;
     
@@ -30,7 +30,7 @@ public class NetTcpClient
     public NetTcpClient(IPEndPoint endPoint, Encoding encoding, bool enableTcpListener)
     {
         NetClient = new TcpClient();
-        Encoding = encoding;
+        _encoding = encoding;
         _endPoint = endPoint;
         _enableTcpListener = enableTcpListener;
     }
@@ -84,7 +84,7 @@ public class NetTcpClient
             NetClient.SendTimeout = timeout; 
             
             // Create a network writer
-            var writer = new StreamWriter(NetClient.GetStream(), Encoding);
+            var writer = new StreamWriter(NetClient.GetStream(), _encoding);
 
             // Send bytes to the destination
             writer.WriteLine(content);
@@ -110,7 +110,7 @@ public class NetTcpClient
             Disconnected?.Invoke(this);
         
         // Decode byte array to string
-        var decoded = Encoding.GetString(content);
+        var decoded = _encoding.GetString(content);
 
         try
         {
@@ -118,7 +118,7 @@ public class NetTcpClient
             NetClient.SendTimeout = timeout;
             
             // Create a network writer
-            var writer = new StreamWriter(NetClient.GetStream(), Encoding);
+            var writer = new StreamWriter(NetClient.GetStream(), _encoding);
 
             // Send bytes to the destination
             writer.WriteLine(decoded);
@@ -152,7 +152,7 @@ public class NetTcpClient
             NetClient.SendTimeout = timeout;
             
             // Create a network writer
-            var writer = new StreamWriter(NetClient.GetStream(), Encoding);
+            var writer = new StreamWriter(NetClient.GetStream(), _encoding);
 
             // Send bytes to the destination
             writer.WriteLine(json);
@@ -183,7 +183,7 @@ public class NetTcpClient
     private void Receiver()
     {
         // Create Network Stream Reader
-        var reader = new StreamReader(NetClient.GetStream(), Encoding);
+        var reader = new StreamReader(NetClient.GetStream(), _encoding);
 
         try
         {
